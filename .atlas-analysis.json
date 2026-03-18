@@ -1,0 +1,103 @@
+{
+  "projectType": "sdk-library",
+  "projectName": "cmdk",
+  "projectDescription": "A fast, unstyled, fully composable command menu React component with automatic filtering and sorting.",
+  "theme": "willow",
+  "primaryColor": "#94cb04",
+  "lightColor": "#545454",
+  "darkColor": null,
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": ["introduction", "installation", "quickstart"]
+          },
+          {
+            "group": "Components",
+            "pages": [
+              "components/command",
+              "components/dialog",
+              "components/input",
+              "components/list",
+              "components/item",
+              "components/group",
+              "components/separator",
+              "components/empty",
+              "components/loading"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/styling",
+              "guides/accessibility",
+              "guides/filtering",
+              "guides/async",
+              "guides/nested-items",
+              "guides/popover"
+            ]
+          },
+          {
+            "group": "Examples",
+            "pages": [
+              "examples/vercel",
+              "examples/linear",
+              "examples/raycast",
+              "examples/framer"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Hooks",
+            "pages": ["api/use-command-state"]
+          },
+          {
+            "group": "Types",
+            "pages": ["api/types"]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Fully composable compound component API",
+    "Automatic filtering and sorting with built-in command-score",
+    "Custom filter function support with keyword aliases",
+    "Accessible combobox with full ARIA support",
+    "Radix UI Dialog integration for modal usage",
+    "React 18 safe with useSyncExternalStore",
+    "Unstyled with CSS data-attribute selectors for customization",
+    "Keyboard navigation with vim bindings support",
+    "forceMount prop for persistent items and groups",
+    "CSS variable for animated list height (--cmdk-list-height)"
+  ],
+  "publicApiSurface": [
+    "Command",
+    "Command.Input",
+    "Command.List",
+    "Command.Item",
+    "Command.Group",
+    "Command.Separator",
+    "Command.Dialog",
+    "Command.Empty",
+    "Command.Loading",
+    "useCommandState",
+    "CommandRoot",
+    "CommandList",
+    "CommandItem",
+    "CommandInput",
+    "CommandGroup",
+    "CommandSeparator",
+    "CommandDialog",
+    "CommandEmpty",
+    "CommandLoading",
+    "defaultFilter"
+  ]
+}
