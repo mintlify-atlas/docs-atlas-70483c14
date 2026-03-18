@@ -3,7 +3,11 @@ title: 'TypeScript types'
 description: 'All exported TypeScript types and interfaces from the cmdk package.'
 ---
 
-cmdk is written in TypeScript and exports full type definitions for every component and utility.
+cmdk is written in TypeScript and ships a `.d.ts` declaration file. All component prop types are available for inference via `React.ComponentProps` utilities.
+
+<Note>
+  The prop type interfaces (`CommandProps`, `ItemProps`, etc.) are **not exported** as named exports from the package. To type component props in your own code, use `React.ComponentProps<typeof Command>`, `React.ComponentProps<typeof Command.Item>`, etc.
+</Note>
 
 ## Import styles
 
@@ -24,7 +28,7 @@ import { Command } from 'cmdk'
 
 ```tsx
 // Individual named imports (also available)
-import { CommandInput, CommandList, CommandItem } from 'cmdk'
+import { CommandRoot, CommandInput, CommandList, CommandItem } from 'cmdk'
 
 <CommandRoot>
   <CommandInput />
@@ -242,7 +246,6 @@ A fully typed command palette component using the namespace import style:
 ```tsx
 import * as React from 'react'
 import { Command } from 'cmdk'
-import type { CommandProps } from 'cmdk'
 
 type Action = {
   id: string
@@ -251,9 +254,11 @@ type Action = {
   onSelect: () => void
 }
 
-type CommandPaletteProps = Pick<CommandProps, 'loop' | 'label'> & {
+type CommandPaletteProps = {
   actions: Action[]
   onClose: () => void
+  loop?: boolean
+  label?: string
 }
 
 export function CommandPalette({ actions, onClose, loop = true, label = 'Command palette' }: CommandPaletteProps) {
