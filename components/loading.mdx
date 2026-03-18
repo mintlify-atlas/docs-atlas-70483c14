@@ -1,0 +1,117 @@
+---
+title: 'Loading'
+description: 'A progress indicator rendered while asynchronous items are being fetched.'
+---
+
+`Command.Loading` renders a `role="progressbar"` element while asynchronous command items are loading. Conditionally render it based on your loading state — when items are ready, stop rendering it and let `Command.Empty` or your items take over.
+
+```tsx
+import { Command } from 'cmdk'
+
+export function CommandMenu() {
+  const [loading, setLoading] = React.useState(false)
+
+  return (
+    <Command>
+      <Command.Input />
+      <Command.List>
+        {loading && <Command.Loading>Fetching results...</Command.Loading>}
+        <Command.Empty>No results found.</Command.Empty>
+        <Command.Item>Result 1</Command.Item>
+      </Command.List>
+    </Command>
+  )
+}
+```
+
+**Data attribute:** `[cmdk-loading]`
+
+## Props
+
+<ParamField path="progress" type="number">
+  A number between `0` and `100` representing the estimated loading progress. Set as `aria-valuenow` on the progressbar element. Optional — omit it if you don't have a meaningful progress value and just want to indicate indeterminate loading.
+</ParamField>
+
+<ParamField path="label" type="string" default="Loading...">
+  Accessible label for the progressbar. Set as `aria-label` on the element. Not shown visually. Customize it to describe what is being loaded.
+</ParamField>
+
+## Examples
+
+### Conditional rendering with loading state
+
+Render `Command.Loading` only while fetching, then let normal items or `Command.Empty` take over:
+
+```tsx
+const [loading, setLoading] = React.useState(false)
+const [items, setItems] = React.useState<string[]>([])
+
+React.useEffect(() => {
+  setLoading(true)
+  fetchCommands().then((results) => {
+    setItems(results)
+    setLoading(false)
+  })
+}, [])
+
+return (
+  <Command>
+    <Command.Input />
+    <Command.List>
+      {loading && <Command.Loading label="Fetching commands...">Hang on…</Command.Loading>}
+      {items.map((item) => (
+        <Command.Item key={item} value={item}>
+          {item}
+        </Command.Item>
+      ))}
+    </Command.List>
+  </Command>
+)
+```
+
+### Determinate progress bar
+
+When you can estimate loading progress, pass a `progress` value to give screen readers a percentage:
+
+```tsx
+const [progress, setProgress] = React.useState(0)
+
+return (
+  <Command>
+    <Command.Input />
+    <Command.List>
+      {progress < 100 && (
+        <Command.Loading
+          progress={progress}
+          label={`Loading results, ${progress}% complete`}
+        >
+          <div
+            style={{
+              height: 2,
+              background: 'var(--primary)',
+              width: `${progress}%`,
+              transition: 'width 150ms ease',
+            }}
+          />
+        </Command.Loading>
+      )}
+      <Command.Item>Result A</Command.Item>
+    </Command.List>
+  </Command>
+)
+```
+
+### Styling
+
+```css
+[cmdk-loading] {
+  padding: 16px;
+  text-align: center;
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+}
+```
+
+<Tip>
+  Always render `Command.Empty` alongside `Command.Loading`. Once loading finishes and items are set, if the filtered count drops to zero, `Command.Empty` will appear automatically.
+</Tip>

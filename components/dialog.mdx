@@ -1,0 +1,168 @@
+---
+title: 'Dialog'
+description: 'Renders the command menu inside a Radix UI Dialog overlay with an accessible backdrop.'
+---
+
+`Command.Dialog` wraps `Command` in a [Radix UI Dialog](https://www.radix-ui.com/docs/primitives/components/dialog), giving you a modal overlay without writing the boilerplate yourself. All props accepted by `Command` are also accepted by `Command.Dialog` and forwarded directly to the inner `Command` component.
+
+```tsx
+import { Command } from 'cmdk'
+
+export function CommandMenu() {
+  const [open, setOpen] = React.useState(false)
+
+  React.useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault()
+        setOpen((open) => !open)
+      }
+    }
+    document.addEventListener('keydown', down)
+    return () => document.removeEventListener('keydown', down)
+  }, [])
+
+  return (
+    <Command.Dialog open={open} onOpenChange={setOpen} label="Global Command Menu">
+      <Command.Input placeholder="Type a command or search..." />
+      <Command.List>
+        <Command.Empty>No results found.</Command.Empty>
+        <Command.Group heading="Suggestions">
+          <Command.Item>Calendar</Command.Item>
+          <Command.Item>Search</Command.Item>
+          <Command.Item>Settings</Command.Item>
+        </Command.Group>
+      </Command.List>
+    </Command.Dialog>
+  )
+}
+```
+
+**Data attributes:** `[cmdk-dialog]` on the dialog content, `[cmdk-overlay]` on the backdrop overlay.
+
+<Note>
+  The overlay is always rendered when the dialog is open. Style it with `[cmdk-overlay]` in your CSS.
+</Note>
+
+## Props
+
+`Command.Dialog` accepts all props from `Command` plus the following dialog-specific props:
+
+<ParamField path="open" type="boolean">
+  Controls whether the dialog is open. Use together with `onOpenChange` for controlled state.
+</ParamField>
+
+<ParamField path="onOpenChange" type="(open: boolean) => void">
+  Callback fired when the open state changes. Receives the new open state.
+</ParamField>
+
+<ParamField path="overlayClassName" type="string">
+  A `className` applied to the dialog overlay element (`[cmdk-overlay]`). Use this to apply Tailwind classes or other class-based styles to the backdrop.
+</ParamField>
+
+<ParamField path="contentClassName" type="string">
+  A `className` applied to the dialog content element (`[cmdk-dialog]`). Use this to position and size the modal panel.
+</ParamField>
+
+<ParamField path="container" type="HTMLElement">
+  An HTML element to portal the dialog into. Forwarded to [Radix's Dialog Portal](https://www.radix-ui.com/docs/primitives/components/dialog#portal). Defaults to `document.body`.
+</ParamField>
+
+The following props from `Command` are also accepted and forwarded:
+
+<ParamField path="label" type="string">
+  Accessible label for the command menu. Sets `aria-label` on the dialog content.
+</ParamField>
+
+<ParamField path="shouldFilter" type="boolean" default="true">
+  Set to `false` to disable automatic filtering and sorting.
+</ParamField>
+
+<ParamField path="filter" type="(value: string, search: string, keywords?: string[]) => number">
+  Custom filter function for ranking items against the search query.
+</ParamField>
+
+<ParamField path="defaultValue" type="string">
+  The initially selected item value.
+</ParamField>
+
+<ParamField path="value" type="string">
+  Controlled value of the selected item.
+</ParamField>
+
+<ParamField path="onValueChange" type="(value: string) => void">
+  Callback fired when the selected item changes.
+</ParamField>
+
+<ParamField path="loop" type="boolean" default="false">
+  Enable wrap-around keyboard navigation.
+</ParamField>
+
+<ParamField path="disablePointerSelection" type="boolean" default="false">
+  Disable selecting items by pointer movement.
+</ParamField>
+
+<ParamField path="vimBindings" type="boolean" default="true">
+  Enable `Ctrl+N/J/P/K` navigation shortcuts.
+</ParamField>
+
+## Examples
+
+### Open and close with state
+
+Toggle the dialog using a `useState` boolean. Bind a keyboard shortcut to open it:
+
+```tsx
+const [open, setOpen] = React.useState(false)
+
+React.useEffect(() => {
+  const down = (e: KeyboardEvent) => {
+    if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+      e.preventDefault()
+      setOpen((open) => !open)
+    }
+  }
+  document.addEventListener('keydown', down)
+  return () => document.removeEventListener('keydown', down)
+}, [])
+
+return (
+  <Command.Dialog open={open} onOpenChange={setOpen}>
+    <Command.Input />
+    <Command.List>
+      <Command.Item>Calendar</Command.Item>
+      <Command.Item>Settings</Command.Item>
+    </Command.List>
+  </Command.Dialog>
+)
+```
+
+### Custom portal container
+
+By default the dialog portals into `document.body`. Pass a `container` ref to portal into a specific element instead:
+
+```tsx
+const containerRef = React.useRef<HTMLDivElement>(null)
+
+return (
+  <>
+    <Command.Dialog
+      open={open}
+      onOpenChange={setOpen}
+      container={containerRef.current ?? undefined}
+    >
+      <Command.Input />
+      <Command.List>
+        <Command.Item>Apple</Command.Item>
+      </Command.List>
+    </Command.Dialog>
+
+    {/* The dialog will portal into this element */}
+    <div ref={containerRef} />
+  </>
+)
+```
+
+<Tip>
+  Ensure the `open` prop is `false` during server-side rendering to avoid hydration mismatches.
+</Tip>

@@ -1,0 +1,67 @@
+---
+title: 'List'
+description: 'The scrollable container that holds items, groups, and separators.'
+---
+
+`Command.List` is the listbox container for all `Command.Item`, `Command.Group`, and `Command.Separator` components. It handles scroll behavior and exposes a CSS variable you can use to animate the height as results change.
+
+```tsx
+import { Command } from 'cmdk'
+
+export function CommandMenu() {
+  return (
+    <Command>
+      <Command.Input />
+      <Command.List>
+        <Command.Empty>No results found.</Command.Empty>
+        <Command.Group heading="Files">
+          <Command.Item>index.tsx</Command.Item>
+          <Command.Item>package.json</Command.Item>
+        </Command.Group>
+      </Command.List>
+    </Command>
+  )
+}
+```
+
+**Data attribute:** `[cmdk-list]`
+
+## Props
+
+<ParamField path="label" type="string" default="Suggestions">
+  Accessible label for the listbox. Set as `aria-label` on the underlying element. Not shown visually. Change this if the default "Suggestions" label doesn't describe your use case.
+</ParamField>
+
+All other `div` props are forwarded to the underlying element.
+
+## CSS variable: `--cmdk-list-height`
+
+`Command.List` automatically tracks the height of its inner content using a `ResizeObserver` and exposes the value as the `--cmdk-list-height` CSS variable on `[cmdk-list]`. Use this to animate the list height smoothly as the number of visible results changes:
+
+```css
+[cmdk-list] {
+  min-height: 300px;
+  height: var(--cmdk-list-height);
+  max-height: 500px;
+  transition: height 100ms ease;
+}
+```
+
+<Note>
+  The `--cmdk-list-height` variable reflects the height of the inner content wrapper, not the scroll container itself. Pair it with `min-height` and `max-height` to keep the list bounded.
+</Note>
+
+## Scroll padding
+
+When an item is scrolled into view near the top or bottom edge of the list, it can appear flush against the boundary. Use `scroll-padding` to add breathing room:
+
+```css
+[cmdk-list] {
+  scroll-padding-block-start: 8px;
+  scroll-padding-block-end: 8px;
+}
+```
+
+## Accessibility
+
+`Command.List` renders with `role="listbox"` and maintains `aria-activedescendant` pointing to the currently selected item's `id`. The `label` prop sets `aria-label` on the element to describe the list to screen readers.

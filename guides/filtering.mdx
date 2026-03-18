@@ -1,0 +1,129 @@
+---
+title: "Filtering and sorting"
+description: "cmdk filters and sorts items automatically using fuzzy matching. Customize or replace the filter function, or take full manual control."
+---
+
+By default, cmdk uses its built-in `command-score` algorithm — a fuzzy matching library — to rank items against the current search query. Items with a score above 0 are shown; items are sorted by descending score. Groups are re-ordered by the highest score of any item they contain.
+
+Filtering and sorting run synchronously on every keystroke, so the list updates with no visible delay.
+
+## Default behavior
+
+No configuration needed. Items are filtered and sorted automatically:
+
+```tsx
+<Command>
+  <Command.Input />
+  <Command.List>
+    <Command.Group heading="Fruits">
+      <Command.Item>Apple</Command.Item>
+      <Command.Item>Banana</Command.Item>
+      <Command.Item>Cherry</Command.Item>
+    </Command.Group>
+  </Command.List>
+</Command>
+```
+
+<Note>
+  Item values are always trimmed with `.trim()` before scoring. If you provide a `value` prop explicitly, it is trimmed too.
+</Note>
+
+## Custom filter function
+
+Pass a `filter` prop to `Command` to replace the default algorithm. The function receives `(value, search, keywords?)` and must return a number between `0` and `1`:
+
+- `1` — exact match, shown at the top
+- `0` — no match, hidden
+- Values in between affect sort order
+
+```tsx
+// Exact substring match
+<Command
+  filter={(value, search) => {
+    if (value.includes(search)) return 1
+    return 0
+  }}
+>
+  <Command.Input />
+  <Command.List>
+    <Command.Item>Apple</Command.Item>
+    <Command.Item>Banana</Command.Item>
+  </Command.List>
+</Command>
+```
+
+## Keywords
+
+Add a `keywords` prop to `Command.Item` to provide aliases that also match during search. Keywords are trimmed and passed to your filter function as the third argument:
+
+```tsx
+<Command.Item keywords={['fruit', 'red']}>Apple</Command.Item>
+<Command.Item keywords={['fruit', 'yellow']}>Banana</Command.Item>
+```
+
+To use keywords in a custom filter function:
+
+```tsx
+<Command
+  filter={(value, search, keywords) => {
+    const extendValue = value + ' ' + keywords.join(' ')
+    if (extendValue.includes(search)) return 1
+    return 0
+  }}
+>
+  <Command.Input />
+  <Command.List>
+    <Command.Item keywords={['fruit', 'red']}>Apple</Command.Item>
+    <Command.Item keywords={['veggie', 'green']}>Broccoli</Command.Item>
+  </Command.List>
+</Command>
+```
+
+<Note>
+  Keywords are trimmed with `.trim()` before being passed to the filter function.
+</Note>
+
+## Disabling automatic filtering
+
+Set `shouldFilter={false}` to disable all built-in filtering and sorting. You are then responsible for rendering only the items that should be visible based on the current query:
+
+```tsx
+const [search, setSearch] = React.useState('')
+
+const filteredItems = allItems.filter((item) =>
+  item.toLowerCase().includes(search.toLowerCase())
+)
+
+return (
+  <Command shouldFilter={false}>
+    <Command.Input value={search} onValueChange={setSearch} />
+    <Command.List>
+      {filteredItems.map((item) => (
+        <Command.Item key={item} value={item}>
+          {item}
+        </Command.Item>
+      ))}
+    </Command.List>
+  </Command>
+)
+```
+
+<Tip>
+  `shouldFilter={false}` is recommended when you need to bring your own virtualization or when you are filtering a very large list on the server.
+</Tip>
+
+## Using the default filter directly
+
+cmdk exports `defaultFilter`, the same function used internally. Import it if you want to extend the default behavior rather than replace it entirely:
+
+```tsx
+import { Command, defaultFilter } from 'cmdk'
+
+<Command
+  filter={(value, search, keywords) => {
+    // Pin items that start with the search string to the top
+    if (value.startsWith(search)) return 1
+    return defaultFilter(value, search, keywords)
+  }}
+/>
+```

@@ -1,0 +1,282 @@
+---
+title: 'TypeScript types'
+description: 'All exported TypeScript types and interfaces from the cmdk package.'
+---
+
+cmdk is written in TypeScript and exports full type definitions for every component and utility.
+
+## Import styles
+
+cmdk supports two import styles. Both are fully typed.
+
+```tsx
+// Namespace import (recommended)
+// Components are accessed as Command.Input, Command.List, etc.
+import { Command } from 'cmdk'
+
+<Command>
+  <Command.Input />
+  <Command.List>
+    <Command.Item />
+  </Command.List>
+</Command>
+```
+
+```tsx
+// Individual named imports (also available)
+import { CommandInput, CommandList, CommandItem } from 'cmdk'
+
+<CommandRoot>
+  <CommandInput />
+  <CommandList>
+    <CommandItem />
+  </CommandList>
+</CommandRoot>
+```
+
+<Note>
+  The namespace import (`Command`) and the individual named exports (`CommandRoot`, `CommandList`, etc.) refer to the same underlying components. Use whichever style fits your project.
+</Note>
+
+## Component prop types
+
+### CommandProps
+
+Props for the `Command` root component (also exported as `CommandRoot`).
+
+```tsx
+type CommandProps = React.ComponentPropsWithoutRef<'div'> & {
+  /** Accessible label for the command menu. Rendered as a visually hidden element. */
+  label?: string
+  /** Set to `false` to disable automatic filtering and sorting. Default: `true`. */
+  shouldFilter?: boolean
+  /** Custom filter function. Returns a score between 0 (hidden) and 1 (best match). */
+  filter?: CommandFilter
+  /** The value of the initially selected item (uncontrolled). */
+  defaultValue?: string
+  /** The controlled value of the currently selected item. */
+  value?: string
+  /** Callback fired when the selected item changes. */
+  onValueChange?: (value: string) => void
+  /** When `true`, keyboard navigation wraps from the last item to the first. Default: `false`. */
+  loop?: boolean
+  /** When `true`, pointer movement over an item does not select it. Default: `false`. */
+  disablePointerSelection?: boolean
+  /** When `true`, enables Ctrl+N/J (down) and Ctrl+P/K (up) vim-style bindings. Default: `true`. */
+  vimBindings?: boolean
+}
+```
+
+### CommandFilter
+
+The type of the custom filter function accepted by `Command`.
+
+```tsx
+type CommandFilter = (value: string, search: string, keywords?: string[]) => number
+```
+
+Return a number between `0` and `1`. A score of `0` hides the item entirely; `1` is the highest possible rank. The built-in `defaultFilter` export uses the `command-score` algorithm and can be used as a reference implementation or fallback.
+
+```tsx
+import { defaultFilter } from 'cmdk'
+
+// Extend the default filter with additional logic
+const myFilter: CommandFilter = (value, search, keywords) => {
+  // Boost items that start with the search string
+  if (value.startsWith(search)) return 1
+  // Fall back to the default scoring algorithm
+  return defaultFilter(value, search, keywords)
+}
+```
+
+### DialogProps
+
+Props for `Command.Dialog`, which renders the command menu inside a [Radix UI Dialog](https://www.radix-ui.com/primitives/docs/components/dialog). Extends all `CommandProps` plus the Radix `DialogProps`.
+
+```tsx
+type DialogProps = RadixDialog.DialogProps &
+  CommandProps & {
+    /** Class name applied to the Dialog overlay element. */
+    overlayClassName?: string
+    /** Class name applied to the Dialog content element. */
+    contentClassName?: string
+    /** A custom DOM element to portal the Dialog into. */
+    container?: HTMLElement
+  }
+```
+
+### InputProps
+
+Props for `Command.Input`. Extends the native `<input>` element, with `value`, `onChange`, and `type` omitted in favour of the controlled API below.
+
+```tsx
+type InputProps = Omit<
+  React.ComponentPropsWithoutRef<'input'>,
+  'value' | 'onChange' | 'type'
+> & {
+  /** Controlled value of the search input. */
+  value?: string
+  /** Callback fired when the search value changes. */
+  onValueChange?: (search: string) => void
+}
+```
+
+### ListProps
+
+Props for `Command.List`, the container that holds items and groups.
+
+```tsx
+type ListProps = React.ComponentPropsWithoutRef<'div'> & {
+  /** Accessible label for the list of suggestions. Not shown visually. Default: "Suggestions". */
+  label?: string
+}
+```
+
+### ItemProps
+
+Props for `Command.Item`.
+
+```tsx
+type ItemProps = Omit<
+  React.ComponentPropsWithoutRef<'div'>,
+  'disabled' | 'onSelect' | 'value'
+> & {
+  /** When `true`, the item cannot be selected. */
+  disabled?: boolean
+  /** Callback fired when the item is selected via click or `Enter`. */
+  onSelect?: (value: string) => void
+  /**
+   * A unique value for this item used for filtering and selection.
+   * Inferred from `children` text content if not provided.
+   * Must be stable if your text content changes between renders.
+   */
+  value?: string
+  /** Additional search terms to match against when filtering. */
+  keywords?: string[]
+  /** When `true`, the item is always rendered regardless of the search query. */
+  forceMount?: boolean
+}
+```
+
+### GroupProps
+
+Props for `Command.Group`, which groups items under an optional heading.
+
+```tsx
+type GroupProps = Omit<
+  React.ComponentPropsWithoutRef<'div'>,
+  'heading' | 'value'
+> & {
+  /** Optional heading element to render above the group's items. */
+  heading?: React.ReactNode
+  /**
+   * A unique value for this group.
+   * Required when no `heading` is provided, since the heading text is
+   * otherwise used to derive the group's identity.
+   */
+  value?: string
+  /** When `true`, the group and all its items are always rendered. */
+  forceMount?: boolean
+}
+```
+
+### SeparatorProps
+
+Props for `Command.Separator`. The separator is automatically hidden when a search query is active.
+
+```tsx
+type SeparatorProps = React.ComponentPropsWithoutRef<'div'> & {
+  /** When `true`, the separator is always rendered regardless of the search query. */
+  alwaysRender?: boolean
+}
+```
+
+### LoadingProps
+
+Props for `Command.Loading`, a progressbar rendered while async items are being fetched.
+
+```tsx
+type LoadingProps = React.ComponentPropsWithoutRef<'div'> & {
+  /** Estimated loading progress as a percentage (0–100). */
+  progress?: number
+  /** Accessible label for the progressbar. Not shown visually. Default: "Loading...". */
+  label?: string
+}
+```
+
+### EmptyProps
+
+Props for `Command.Empty`, which renders automatically when no items match the current query.
+
+```tsx
+type EmptyProps = React.ComponentPropsWithoutRef<'div'>
+```
+
+## State type
+
+The `State` type represents the internal state object exposed by [`useCommandState`](/api/use-command-state).
+
+```tsx
+type State = {
+  /** The current value of the search input. */
+  search: string
+  /** The value of the currently selected item. */
+  value: string
+  /** The DOM id of the selected item element. */
+  selectedItemId?: string
+  filtered: {
+    /** Total number of visible items after filtering. */
+    count: number
+    /** Map from item id to its filter score (0–1). */
+    items: Map<string, number>
+    /** Set of group ids that have at least one visible item. */
+    groups: Set<string>
+  }
+}
+```
+
+## Real-world example
+
+A fully typed command palette component using the namespace import style:
+
+```tsx
+import * as React from 'react'
+import { Command } from 'cmdk'
+import type { CommandProps } from 'cmdk'
+
+type Action = {
+  id: string
+  label: string
+  keywords?: string[]
+  onSelect: () => void
+}
+
+type CommandPaletteProps = Pick<CommandProps, 'loop' | 'label'> & {
+  actions: Action[]
+  onClose: () => void
+}
+
+export function CommandPalette({ actions, onClose, loop = true, label = 'Command palette' }: CommandPaletteProps) {
+  return (
+    <Command.Dialog open onOpenChange={(open) => !open && onClose()} label={label} loop={loop}>
+      <Command.Input placeholder="Type a command or search..." />
+      <Command.List>
+        <Command.Empty>No results found.</Command.Empty>
+        {actions.map((action) => (
+          <Command.Item
+            key={action.id}
+            value={action.id}
+            keywords={action.keywords}
+            onSelect={() => {
+              action.onSelect()
+              onClose()
+            }}
+          >
+            {action.label}
+          </Command.Item>
+        ))}
+      </Command.List>
+    </Command.Dialog>
+  )
+}
+```

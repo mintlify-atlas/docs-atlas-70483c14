@@ -1,0 +1,96 @@
+---
+title: 'Input'
+description: 'The search input that drives filtering and sorting of command menu items.'
+---
+
+`Command.Input` is the text field users type into to search the command menu. As the user types, items are filtered and sorted in real time. All standard HTML `<input>` props are forwarded to the underlying element, with the exception of `value`, `onChange`, and `type`, which are managed internally or replaced by cmdk-specific props.
+
+```tsx
+import { Command } from 'cmdk'
+
+export function CommandMenu() {
+  return (
+    <Command>
+      <Command.Input placeholder="Type a command..." />
+      <Command.List>
+        <Command.Item>Calendar</Command.Item>
+        <Command.Item>Settings</Command.Item>
+      </Command.List>
+    </Command>
+  )
+}
+```
+
+**Data attribute:** `[cmdk-input]`
+
+<Note>
+  `Command.Input` automatically sets `autoComplete="off"`, `autoCorrect="off"`, `spellCheck={false}`, and `type="text"`. These are not configurable.
+</Note>
+
+## Props
+
+<ParamField path="value" type="string">
+  Controlled value of the search input. When provided, the component operates in controlled mode — the input displays this value and `onValueChange` is called on every keystroke. Syncs the internal search state automatically.
+</ParamField>
+
+<ParamField path="onValueChange" type="(search: string) => void">
+  Callback fired when the search query changes. Receives the current value of the input as a string.
+</ParamField>
+
+All other props from `React.ComponentPropsWithoutRef<'input'>` are supported and forwarded to the underlying `<input>` element, including `placeholder`, `className`, `autoFocus`, `disabled`, `ref`, `aria-*`, and `data-*` attributes.
+
+## Examples
+
+### Uncontrolled
+
+In most cases you don't need to control the input value — cmdk manages the search state internally:
+
+```tsx
+<Command>
+  <Command.Input placeholder="Search commands..." />
+  <Command.List>
+    <Command.Item>Open file</Command.Item>
+    <Command.Item>New terminal</Command.Item>
+  </Command.List>
+</Command>
+```
+
+### Controlled search state
+
+Use `value` and `onValueChange` when you need to read or reset the search query externally:
+
+```tsx
+const [search, setSearch] = React.useState('')
+
+return (
+  <Command>
+    <Command.Input
+      value={search}
+      onValueChange={setSearch}
+      placeholder="Search..."
+    />
+    <Command.List>
+      <Command.Item>Apple</Command.Item>
+      <Command.Item>Banana</Command.Item>
+    </Command.List>
+    <button onClick={() => setSearch('')}>Clear</button>
+  </Command>
+)
+```
+
+### Auto-focus on open
+
+Pass `autoFocus` to focus the input as soon as the menu renders:
+
+```tsx
+<Command.Dialog open={open} onOpenChange={setOpen}>
+  <Command.Input autoFocus placeholder="Type a command..." />
+  <Command.List>
+    <Command.Item>Settings</Command.Item>
+  </Command.List>
+</Command.Dialog>
+```
+
+<Tip>
+  When using `Command.Dialog`, Radix UI automatically manages focus trapping. You generally don't need `autoFocus` in that case.
+</Tip>

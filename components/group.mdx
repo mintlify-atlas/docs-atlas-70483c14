@@ -1,0 +1,101 @@
+---
+title: 'Group'
+description: 'A labeled section that visually and semantically groups related command items.'
+---
+
+`Command.Group` wraps a set of `Command.Item` components under a shared heading. When the user searches, the group — including its heading — is hidden if none of its items match. Groups are never unmounted; they are hidden using the `hidden` HTML attribute.
+
+```tsx
+import { Command } from 'cmdk'
+
+export function CommandMenu() {
+  return (
+    <Command>
+      <Command.Input />
+      <Command.List>
+        <Command.Group heading="Files">
+          <Command.Item>index.tsx</Command.Item>
+          <Command.Item>package.json</Command.Item>
+        </Command.Group>
+        <Command.Group heading="Settings">
+          <Command.Item>Appearance</Command.Item>
+          <Command.Item>Keyboard shortcuts</Command.Item>
+        </Command.Group>
+      </Command.List>
+    </Command>
+  )
+}
+```
+
+**Data attributes:**
+- `[cmdk-group]` — always present on the group container
+- `[cmdk-group-heading]` — present on the heading element
+- `hidden` — applied to the group element when all its items are filtered out
+
+<Note>
+  Groups use the `hidden` HTML attribute rather than unmounting from the DOM when filtered. Keep this in mind when writing CSS — use `[cmdk-group]:not([hidden])` to target only visible groups.
+</Note>
+
+## Props
+
+<ParamField path="heading" type="React.ReactNode">
+  The heading content displayed above the group's items. Rendered in a `[cmdk-group-heading]` element. Set `aria-hidden` automatically so it doesn't interfere with listbox accessibility semantics.
+</ParamField>
+
+<ParamField path="value" type="string">
+  A unique identifier for the group. Required when no `heading` is provided. If a `heading` is provided, the value is inferred from the heading's text content. Used internally for sorting groups by their highest-scoring item.
+</ParamField>
+
+<ParamField path="forceMount" type="boolean" default="false">
+  When `true`, the group and all of its items are always rendered regardless of the current search query. The `hidden` attribute is never applied. Also propagates to child `Command.Item` components.
+</ParamField>
+
+## Examples
+
+### Group with heading
+
+```tsx
+<Command.Group heading="Recent">
+  <Command.Item>home.tsx</Command.Item>
+  <Command.Item>about.tsx</Command.Item>
+</Command.Group>
+```
+
+### Group without heading
+
+When you omit the heading, provide a unique `value` so cmdk can track the group internally:
+
+```tsx
+<Command.Group value="ungrouped-actions">
+  <Command.Item>Delete account</Command.Item>
+  <Command.Item>Log out</Command.Item>
+</Command.Group>
+```
+
+### Styling visible groups
+
+Because groups use `hidden` instead of unmounting, target only visible groups explicitly:
+
+```css
+[cmdk-group]:not([hidden]) + [cmdk-group]:not([hidden]) {
+  border-top: 1px solid var(--border);
+}
+
+[cmdk-group-heading] {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+  padding: 4px 8px;
+}
+```
+
+### Always-visible group
+
+Use `forceMount` to keep a group visible regardless of what the user is searching for:
+
+```tsx
+<Command.Group heading="Quick Actions" forceMount>
+  <Command.Item>Open help</Command.Item>
+  <Command.Item>Send feedback</Command.Item>
+</Command.Group>
+```

@@ -1,0 +1,85 @@
+---
+title: 'Empty'
+description: 'A container that renders automatically when no items match the current search query.'
+---
+
+`Command.Empty` renders its children only when the filtered item count drops to zero — that is, when the user has typed a search query that matches no items. It disappears automatically as soon as any item becomes visible.
+
+```tsx
+import { Command } from 'cmdk'
+
+export function CommandMenu() {
+  return (
+    <Command>
+      <Command.Input />
+      <Command.List>
+        <Command.Empty>No results found.</Command.Empty>
+        <Command.Item>Apple</Command.Item>
+        <Command.Item>Banana</Command.Item>
+      </Command.List>
+    </Command>
+  )
+}
+```
+
+**Data attribute:** `[cmdk-empty]`
+
+## Props
+
+`Command.Empty` accepts all standard `div` props and forwards them to the underlying element. There are no cmdk-specific props.
+
+## Behavior
+
+`Command.Empty` subscribes to the filtered item count in the cmdk store. It renders when `filteredCount === 0` and returns `null` otherwise. It is fully unmounted (not just hidden) when items are present.
+
+<Note>
+  `Command.Empty` counts all visible items across all groups. It will render if every item is filtered out, even if `forceMount` items are present — because `forceMount` items are excluded from the filtered count.
+</Note>
+
+## Examples
+
+### Custom empty message
+
+```tsx
+<Command.Empty>No commands match your search.</Command.Empty>
+```
+
+### Dynamic empty state using search state
+
+Use the `useCommandState` hook to show what the user searched for:
+
+```tsx
+import { Command, useCommandState } from 'cmdk'
+
+function EmptyState() {
+  const search = useCommandState((state) => state.search)
+  return (
+    <Command.Empty>
+      No results for <strong>{search}</strong>.
+    </Command.Empty>
+  )
+}
+
+export function CommandMenu() {
+  return (
+    <Command>
+      <Command.Input />
+      <Command.List>
+        <EmptyState />
+        <Command.Item>Settings</Command.Item>
+      </Command.List>
+    </Command>
+  )
+}
+```
+
+### Styled empty state
+
+```css
+[cmdk-empty] {
+  padding: 24px;
+  text-align: center;
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+}
+```

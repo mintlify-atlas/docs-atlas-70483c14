@@ -1,0 +1,167 @@
+---
+title: "Styling"
+description: "cmdk ships zero CSS. Style every part of the command menu using data attributes."
+---
+
+cmdk is completely unstyled — no stylesheet is included with the package. Every component exposes a `cmdk-*` data attribute that you can target directly in CSS, giving you full control without specificity battles or class name collisions.
+
+## CSS selectors
+
+Every part of the command menu is addressable via a data attribute:
+
+| Selector | Description |
+|---|---|
+| `[cmdk-root]` | The root `Command` component |
+| `[cmdk-input]` | The search input |
+| `[cmdk-list]` | The scrollable list container |
+| `[cmdk-item]` | Each item in the list |
+| `[cmdk-item][data-selected]` | The currently selected item |
+| `[cmdk-item][data-disabled]` | A disabled item |
+| `[cmdk-group]` | A group container |
+| `[cmdk-group-heading]` | The heading text inside a group |
+| `[cmdk-group][hidden]` | A group hidden by filtering |
+| `[cmdk-separator]` | A visual separator between items |
+| `[cmdk-empty]` | Shown automatically when no results match |
+| `[cmdk-loading]` | Shown while async items are loading |
+| `[cmdk-dialog]` | The `Command.Dialog` content element |
+| `[cmdk-overlay]` | The `Command.Dialog` backdrop overlay |
+
+## Animating list height
+
+`Command.List` sets a `--cmdk-list-height` CSS variable on itself, updated via a `ResizeObserver` as items filter in and out. Use it to animate the height smoothly:
+
+```css
+[cmdk-list] {
+  min-height: 300px;
+  height: var(--cmdk-list-height);
+  max-height: 500px;
+  transition: height 100ms ease;
+}
+```
+
+## Scroll padding
+
+To keep items from being flush with the edge of the viewport when scrolling, use `scroll-padding`:
+
+```css
+[cmdk-list] {
+  scroll-padding-block-start: 8px;
+  scroll-padding-block-end: 8px;
+}
+```
+
+## className and forwarded props
+
+All cmdk components accept a `className` prop and forward all standard div/input props to the underlying element. You can apply utility classes from Tailwind, CSS Modules, or any other system:
+
+```tsx
+<Command className="my-command">
+  <Command.Input className="my-command__input" />
+  <Command.List className="my-command__list">
+    <Command.Item className="my-command__item">Apple</Command.Item>
+  </Command.List>
+</Command>
+```
+
+## Example: Vercel-style stylesheet
+
+Below is an adapted version of the [Vercel example stylesheet](https://github.com/pacocoursey/cmdk/blob/main/website/styles/cmdk/vercel.scss) showing how the data attributes map to real styles:
+
+```css
+[cmdk-root] {
+  max-width: 640px;
+  width: 100%;
+  padding: 8px;
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--gray6);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  outline: none;
+}
+
+[cmdk-input] {
+  border: none;
+  width: 100%;
+  font-size: 17px;
+  padding: 8px 8px 16px 8px;
+  outline: none;
+  background: transparent;
+  color: var(--gray12);
+  border-bottom: 1px solid var(--gray6);
+  margin-bottom: 16px;
+}
+
+[cmdk-input]::placeholder {
+  color: var(--gray9);
+}
+
+[cmdk-list] {
+  height: min(330px, var(--cmdk-list-height));
+  max-height: 400px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  transition: height 100ms ease;
+}
+
+[cmdk-item] {
+  cursor: pointer;
+  height: 48px;
+  border-radius: 8px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  color: var(--gray11);
+  user-select: none;
+}
+
+[cmdk-item][data-selected='true'] {
+  background: var(--grayA3);
+  color: var(--gray12);
+}
+
+[cmdk-item][data-disabled='true'] {
+  color: var(--gray8);
+  cursor: not-allowed;
+}
+
+[cmdk-group-heading] {
+  font-size: 12px;
+  color: var(--gray11);
+  padding: 0 8px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  user-select: none;
+}
+
+[cmdk-separator] {
+  height: 1px;
+  background: var(--gray5);
+  margin: 4px 0;
+}
+
+[cmdk-empty] {
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+  color: var(--gray11);
+}
+```
+
+<Note>
+  Groups are never removed from the DOM when filtered out — the `hidden` attribute is applied instead. If you use `display: flex` on a group container, make sure to handle `[cmdk-group][hidden] { display: none; }` explicitly.
+</Note>
+
+## Example stylesheets
+
+The cmdk repository includes several drop-in stylesheets you can use as starting points:
+
+- **Vercel** — Clean, minimal, light/dark — `website/styles/cmdk/vercel.scss`
+- **Raycast** — Polished with animated borders — `website/styles/cmdk/raycast.scss`
+- **Linear** — Dense, keyboard-focused — `website/styles/cmdk/linear.scss`
+- **Framer** — Motion-heavy transitions — `website/styles/cmdk/framer.scss`

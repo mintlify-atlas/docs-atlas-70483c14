@@ -1,0 +1,129 @@
+---
+title: 'Item'
+description: 'A selectable option in the command menu that responds to keyboard navigation and pointer interaction.'
+---
+
+`Command.Item` renders a single selectable option. Items become active when the pointer enters them or when they are reached through keyboard navigation. Selecting an item (via `Enter` or click) fires `onSelect`.
+
+Items are automatically filtered and sorted as the user types. If no `value` is provided, the value is inferred from the item's text content.
+
+```tsx
+import { Command } from 'cmdk'
+
+export function CommandMenu() {
+  return (
+    <Command>
+      <Command.Input />
+      <Command.List>
+        <Command.Item onSelect={(value) => console.log('Selected:', value)}>
+          Open Settings
+        </Command.Item>
+      </Command.List>
+    </Command>
+  )
+}
+```
+
+**Data attributes:**
+- `[cmdk-item]` — always present
+- `[data-selected]` — present when the item is currently selected (focused)
+- `[data-disabled]` — present when the item is disabled
+
+<Warning>
+  If an item's text content changes between renders, you must provide a stable `value` prop. Without it, the inferred value will change and can cause unexpected filtering or selection behavior.
+</Warning>
+
+## Props
+
+<ParamField path="value" type="string">
+  A unique value for this item, used for filtering, sorting, and selection state. If omitted, cmdk infers the value from the item's `children` text or rendered `textContent`. Must be stable if your text content changes between renders.
+</ParamField>
+
+<ParamField path="onSelect" type="(value: string) => void">
+  Callback fired when the item is selected, either by pressing `Enter` while it is focused or by clicking it. Receives the item's `value` string.
+</ParamField>
+
+<ParamField path="disabled" type="boolean" default="false">
+  When `true`, the item is not selectable by keyboard or pointer. It remains in the DOM and receives the `data-disabled` attribute, but `onSelect` will not fire.
+</ParamField>
+
+<ParamField path="keywords" type="string[]">
+  Additional search aliases for this item. Keywords are matched alongside the item's value and can affect its sort rank. Keywords are trimmed before use.
+</ParamField>
+
+<ParamField path="forceMount" type="boolean" default="false">
+  When `true`, the item is always rendered regardless of the current search query. It will not be hidden by filtering. Useful for pinned actions or static entries.
+</ParamField>
+
+## Examples
+
+### Basic item with onSelect
+
+```tsx
+<Command.Item onSelect={(value) => router.push(`/settings`)}>Settings</Command.Item>
+```
+
+### Providing an explicit value
+
+Always provide `value` when your item content is dynamic or contains elements beyond plain text:
+
+```tsx
+<Command.Item value="new-file" onSelect={handleNewFile}>
+  <FileIcon />
+  New File
+</Command.Item>
+```
+
+### Keywords for better search
+
+Add aliases so items appear for related search terms:
+
+```tsx
+<Command.Item
+  value="settings"
+  keywords={['preferences', 'configuration', 'options']}
+  onSelect={() => openSettings()}
+>
+  Settings
+</Command.Item>
+```
+
+### Disabled state
+
+```tsx
+<Command.Item disabled>Upgrade to Pro (coming soon)</Command.Item>
+```
+
+Style the disabled state with CSS:
+
+```css
+[cmdk-item][data-disabled='true'] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+```
+
+### Selected state styling
+
+Target the active item with `[data-selected]`:
+
+```css
+[cmdk-item][data-selected='true'] {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+```
+
+### Force mount a pinned item
+
+Use `forceMount` to keep a static item visible even when search produces no match for it:
+
+```tsx
+<Command.List>
+  <Command.Item forceMount onSelect={() => openHelp()}>
+    Help & Documentation
+  </Command.Item>
+  <Command.Item>Search files</Command.Item>
+  <Command.Item>Open terminal</Command.Item>
+</Command.List>
+```

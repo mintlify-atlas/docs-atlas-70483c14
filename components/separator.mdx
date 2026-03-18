@@ -1,0 +1,81 @@
+---
+title: 'Separator'
+description: 'A visual divider between items or groups that hides automatically when the user is searching.'
+---
+
+`Command.Separator` renders a visual and semantic separator (using `role="separator"`) between items or groups. By default it is only visible when the search query is empty — it hides as soon as the user starts typing, so it doesn't clutter search results. Pass `alwaysRender` to keep it visible regardless of the search state.
+
+```tsx
+import { Command } from 'cmdk'
+
+export function CommandMenu() {
+  return (
+    <Command>
+      <Command.Input />
+      <Command.List>
+        <Command.Item>Calendar</Command.Item>
+        <Command.Item>Search</Command.Item>
+        <Command.Separator />
+        <Command.Item>Settings</Command.Item>
+        <Command.Item>Profile</Command.Item>
+      </Command.List>
+    </Command>
+  )
+}
+```
+
+**Data attribute:** `[cmdk-separator]`
+
+## Props
+
+<ParamField path="alwaysRender" type="boolean" default="false">
+  When `true`, the separator is rendered even when the user has typed a search query. By default, separators are only rendered when the search input is empty.
+</ParamField>
+
+All other `div` props are forwarded to the underlying element.
+
+## Behavior
+
+The separator renders when **either** of these conditions is true:
+
+- The search query is empty (default behavior)
+- `alwaysRender` is `true`
+
+When neither condition is met, the component returns `null` — it is fully removed from the DOM, not just hidden.
+
+## Styling
+
+```css
+[cmdk-separator] {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 0;
+}
+```
+
+## Examples
+
+### Default separator (hidden during search)
+
+```tsx
+<Command.List>
+  <Command.Item>Copy</Command.Item>
+  <Command.Item>Paste</Command.Item>
+  <Command.Separator />
+  <Command.Item>Delete</Command.Item>
+</Command.List>
+```
+
+### Always-visible separator
+
+```tsx
+<Command.List>
+  <Command.Item>Profile</Command.Item>
+  <Command.Separator alwaysRender />
+  <Command.Item>Log out</Command.Item>
+</Command.List>
+```
+
+<Tip>
+  Use `alwaysRender` sparingly. Separators that persist during search can make filtered results look fragmented.
+</Tip>

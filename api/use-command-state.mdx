@@ -1,0 +1,170 @@
+---
+title: 'useCommandState'
+description: 'A hook for reactively reading slices of the command menu state from within a Command tree.'
+---
+
+`useCommandState` lets you subscribe to the internal state of a `Command` menu and re-render only when the selected slice changes. It is built on [`useSyncExternalStore`](https://react.dev/reference/react/useSyncExternalStore) and is safe to use in concurrent React.
+
+Pass a selector function that extracts the piece of state you need. The component re-renders only when the value returned by your selector changes — other state changes do not trigger a re-render.
+
+<Warning>
+  `useCommandState` is intended for advanced use cases. In most situations you do not need direct access to the command menu state — standard React patterns (controlled inputs, callbacks) are sufficient.
+</Warning>
+
+<Note>
+  This hook must be called inside a component that is rendered within a `<Command>` tree. Calling it outside of a `Command` context will throw.
+</Note>
+
+## Signature
+
+```tsx
+function useCommandState<T>(selector: (state: State) => T): T
+```
+
+<ParamField path="selector" type="(state: State) => T" required>
+  A function that receives the full command menu state and returns the slice you want to subscribe to. The hook re-renders whenever the return value of this function changes (compared by reference equality).
+</ParamField>
+
+## State type
+
+The `state` object passed to your selector has the following shape:
+
+```tsx
+type State = {
+  search: string
+  value: string
+  selectedItemId?: string
+  filtered: {
+    count: number
+    items: Map<string, number>
+    groups: Set<string>
+  }
+}
+```
+
+<ResponseField name="search" type="string">
+  The current value of the search input. Updated synchronously as the user types.
+</ResponseField>
+
+<ResponseField name="value" type="string">
+  The value of the currently selected item. Matches the `value` prop (or inferred text content) of the focused `Command.Item`.
+</ResponseField>
+
+<ResponseField name="selectedItemId" type="string | undefined">
+  The DOM `id` attribute of the currently selected item element. Useful when you need to reference the selected element directly, for example to scroll it into view or measure it.
+</ResponseField>
+
+<ResponseField name="filtered.count" type="number">
+  The total number of items currently visible after filtering. This is `0` when no items match the search query and is the value `Command.Empty` uses to decide whether to render.
+</ResponseField>
+
+<ResponseField name="filtered.items" type="Map<string, number>">
+  A map from each visible item's internal id to its filter score. Scores are numbers between `0` and `1`, where `1` is the best match. Items with a score of `0` are hidden.
+</ResponseField>
+
+<ResponseField name="filtered.groups" type="Set<string>">
+  The set of group ids that have at least one visible item. Groups not in this set are hidden when a search query is active.
+</ResponseField>
+
+## Examples
+
+### Read the current search query
+
+The most common use case is reading `search` inside a sub-component to render results that are fetched or computed outside the `Command` tree. This pattern is sometimes called a "SubItem":
+
+```tsx
+import { Command, useCommandState } from 'cmdk'
+
+function SubItem({ children, shortcut }: { children: React.ReactNode; shortcut: string }) {
+  const search = useCommandState((state) => state.search)
+
+  // Only render sub-items when the user has typed something
+  if (!search) return null
+
+  return (
+    <Command.Item>
+      {children}
+      <span>{shortcut}</span>
+    </Command.Item>
+  )
+}
+
+export function CommandMenu() {
+  return (
+    <Command>
+      <Command.Input placeholder="Search..." />
+      <Command.List>
+        <Command.Item>Open settings</Command.Item>
+        <SubItem shortcut="⌘N">New file</SubItem>
+        <SubItem shortcut="⌘⇧N">New window</SubItem>
+      </Command.List>
+    </Command>
+  )
+}
+```
+
+### Read the currently selected value
+
+Use `value` to highlight related UI outside the command menu, such as a preview panel:
+
+```tsx
+function PreviewPanel() {
+  const value = useCommandState((state) => state.value)
+
+  return (
+    <div className="preview">
+      {value ? <p>Previewing: {value}</p> : <p>Select an item to preview.</p>}
+    </div>
+  )
+}
+
+export function CommandMenu() {
+  return (
+    <Command>
+      <Command.Input />
+      <div className="layout">
+        <Command.List>
+          <Command.Item value="new-file">New file</Command.Item>
+          <Command.Item value="open-folder">Open folder</Command.Item>
+        </Command.List>
+        <PreviewPanel />
+      </div>
+    </Command>
+  )
+}
+```
+
+### Show a filtered result count
+
+Use `filtered.count` to display a badge showing how many items match the current query:
+
+```tsx
+function ResultCount() {
+  const count = useCommandState((state) => state.filtered.count)
+  const search = useCommandState((state) => state.search)
+
+  if (!search) return null
+
+  return (
+    <span className="result-count">
+      {count} {count === 1 ? 'result' : 'results'}
+    </span>
+  )
+}
+
+export function CommandMenu() {
+  return (
+    <Command>
+      <div className="input-row">
+        <Command.Input placeholder="Search commands..." />
+        <ResultCount />
+      </div>
+      <Command.List>
+        <Command.Item>Calendar</Command.Item>
+        <Command.Item>Search</Command.Item>
+        <Command.Item>Settings</Command.Item>
+      </Command.List>
+    </Command>
+  )
+}
+```

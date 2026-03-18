@@ -1,0 +1,100 @@
+---
+title: 'Installation'
+description: 'Install cmdk and configure it for your React project.'
+---
+
+## Install the package
+
+<CodeGroup>
+
+```bash npm
+npm install cmdk
+```
+
+```bash yarn
+yarn add cmdk
+```
+
+```bash pnpm
+pnpm add cmdk
+```
+
+```bash bun
+bun add cmdk
+```
+
+</CodeGroup>
+
+## Peer dependencies
+
+cmdk requires React and ReactDOM as peer dependencies. Both React 18 and React 19 (including release candidates) are supported.
+
+| Package | Version |
+| --- | --- |
+| `react` | `^18 \|\| ^19 \|\| ^19.0.0-rc` |
+| `react-dom` | `^18 \|\| ^19 \|\| ^19.0.0-rc` |
+
+If your project already has React installed, no additional action is needed.
+
+## Radix UI dependencies
+
+cmdk uses several Radix UI primitives internally. These are listed as regular dependencies and are installed automatically when you install cmdk.
+
+| Package | Purpose |
+| --- | --- |
+| `@radix-ui/react-dialog` | Powers `Command.Dialog` overlay |
+| `@radix-ui/react-compose-refs` | Ref merging utility |
+| `@radix-ui/react-id` | Stable ID generation |
+| `@radix-ui/react-primitive` | Base primitive components |
+
+You do not need to install these packages separately.
+
+## Client component requirement
+
+<Warning>
+  cmdk is a client component — it cannot be used in React Server Components. Add `'use client'` to any component that imports cmdk.
+</Warning>
+
+### Next.js App Router
+
+In the Next.js App Router, all components are Server Components by default. Add the `'use client'` directive at the top of any file that imports from cmdk.
+
+```tsx
+'use client'
+
+import { Command } from 'cmdk'
+
+export function CommandMenu() {
+  return (
+    <Command>
+      <Command.Input />
+      <Command.List>
+        <Command.Item>Example</Command.Item>
+      </Command.List>
+    </Command>
+  )
+}
+```
+
+<Tip>
+  You can keep `'use client'` scoped to a single wrapper component and import that component from your Server Components freely.
+</Tip>
+
+### Vite / Create React App
+
+In projects where all components are client components by default (Vite, Create React App, etc.), no extra configuration is needed. Import and use cmdk directly.
+
+```tsx
+import { Command } from 'cmdk'
+
+export function CommandMenu() {
+  return (
+    <Command>
+      <Command.Input />
+      <Command.List>
+        <Command.Item>Example</Command.Item>
+      </Command.List>
+    </Command>
+  )
+}
+```

@@ -1,97 +1,89 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: "cmdk"
+description: "Fast, unstyled command menu React component"
 ---
 
-## Setting up
+## What is cmdk?
 
-Get your documentation site up and running in minutes.
+cmdk is a command menu React component that can also be used as an accessible combobox. You render items, it filters and sorts them automatically. cmdk supports a fully composable API, so you can wrap items in other components or even as static JSX.
 
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
+```tsx
+import { Command } from 'cmdk'
 
-## Make it yours
+const CommandMenu = () => {
+  return (
+    <Command label="Command Menu">
+      <Command.Input placeholder="Type a command or search..." />
+      <Command.List>
+        <Command.Empty>No results found.</Command.Empty>
 
-Design a docs site that looks great and empowers your users.
+        <Command.Group heading="Navigation">
+          <Command.Item onSelect={() => router.push('/home')}>Home</Command.Item>
+          <Command.Item onSelect={() => router.push('/settings')}>Settings</Command.Item>
+        </Command.Group>
 
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
+        <Command.Group heading="Actions">
+          <Command.Item onSelect={() => createNew()}>Create new item</Command.Item>
+        </Command.Group>
+      </Command.List>
+    </Command>
+  )
+}
+```
+
+<CardGroup cols={2}>
+  <Card title="Installation" icon="download" href="/installation">
+    Install cmdk with your package manager of choice and add it to your React project.
   </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Build your first command menu in minutes with a complete working example.
   </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
+  <Card title="Components" icon="puzzle-piece" href="/components/command">
+    Explore the full component API — Command, Input, List, Item, Group, Dialog, and more.
   </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
+  <Card title="Styling guide" icon="paintbrush" href="/guides/styling">
+    Learn how to style cmdk using CSS data-attributes and custom stylesheets.
   </Card>
-</Columns>
+</CardGroup>
 
-## Create beautiful pages
+## Key features
 
-Everything you need to create world-class documentation.
+<CardGroup cols={2}>
+  <Card title="Composable API" icon="layer-group">
+    Render any JSX as items — wrap them in your own components, use static markup, or mix both. No render props or data arrays needed.
+  </Card>
+  <Card title="Automatic filtering" icon="magnifying-glass">
+    Built-in fuzzy search with `command-score` ranks items as you type. Or bring your own filter function with full keyword support.
+  </Card>
+  <Card title="Fully accessible" icon="universal-access">
+    Full ARIA combobox implementation tested with VoiceOver. Dialog mode wraps Radix UI's accessible Dialog component.
+  </Card>
+  <Card title="Unstyled by design" icon="paintbrush">
+    Zero default styles. Target components with CSS `data-` attributes like `[cmdk-item]`, `[cmdk-input]`, and `[cmdk-group]`.
+  </Card>
+  <Card title="React 18+" icon="atom">
+    Built with `useSyncExternalStore` and `useId`. Safe with React 18, React 19, and React Strict Mode.
+  </Card>
+  <Card title="Keyboard navigation" icon="keyboard">
+    Arrow keys, Home/End, Enter to select. Optional vim bindings (`Ctrl+n/p/j/k`) and loop-around navigation.
+  </Card>
+</CardGroup>
 
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
-  </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
-  </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
+## Example themes
 
-## Need inspiration?
+The cmdk website showcases several styled themes you can use as a starting point:
 
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>
+<CardGroup cols={2}>
+  <Card title="Vercel" icon="triangle" href="/examples/vercel">
+    Clean, dark theme inspired by the Vercel command menu.
+  </Card>
+  <Card title="Linear" icon="circle-dot" href="/examples/linear">
+    Sleek, minimal theme inspired by Linear's command palette.
+  </Card>
+  <Card title="Raycast" icon="bolt" href="/examples/raycast">
+    Feature-rich theme inspired by the Raycast launcher.
+  </Card>
+  <Card title="Framer" icon="frame" href="/examples/framer">
+    Smooth, animated theme inspired by Framer's command menu.
+  </Card>
+</CardGroup>

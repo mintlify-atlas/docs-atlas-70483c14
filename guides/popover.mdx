@@ -1,0 +1,123 @@
+---
+title: "Use inside a Popover"
+description: "Embed Command directly inside a Radix UI Popover for an inline command palette triggered by a button."
+---
+
+For an inline command palette that opens relative to a trigger button, embed `Command` inside a [Radix UI Popover](https://www.radix-ui.com/docs/primitives/components/popover). Because cmdk already depends on Radix UI Dialog internally, adding the Popover primitive adds minimal bundle weight.
+
+## Installation
+
+```bash
+pnpm add @radix-ui/react-popover
+```
+
+## Basic example
+
+Render `Command` directly inside `Popover.Content`. Do not use `Command.Dialog` here — that opens a full-screen modal, not a popover:
+
+```tsx
+import * as Popover from '@radix-ui/react-popover'
+import { Command } from 'cmdk'
+
+function CommandPopover() {
+  return (
+    <Popover.Root>
+      <Popover.Trigger asChild>
+        <button>Open command menu</button>
+      </Popover.Trigger>
+
+      <Popover.Content>
+        <Command>
+          <Command.Input placeholder="Search…" />
+          <Command.List>
+            <Command.Empty>No results found.</Command.Empty>
+            <Command.Item>Apple</Command.Item>
+            <Command.Item>Banana</Command.Item>
+            <Command.Item>Cherry</Command.Item>
+          </Command.List>
+        </Command>
+      </Popover.Content>
+    </Popover.Root>
+  )
+}
+```
+
+<Warning>
+  Do not nest `Command.Dialog` inside `Popover.Content`. `Command.Dialog` renders its own Radix Dialog portal and overlay, which conflicts with the Popover's positioning and focus management. Use `Command` directly.
+</Warning>
+
+## Controlled open state
+
+Control the popover programmatically to open it via a keyboard shortcut or other trigger:
+
+```tsx
+import * as Popover from '@radix-ui/react-popover'
+import { Command } from 'cmdk'
+
+function CommandPopover() {
+  const [open, setOpen] = React.useState(false)
+
+  React.useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault()
+        setOpen((open) => !open)
+      }
+    }
+
+    document.addEventListener('keydown', down)
+    return () => document.removeEventListener('keydown', down)
+  }, [])
+
+  return (
+    <Popover.Root open={open} onOpenChange={setOpen}>
+      <Popover.Trigger asChild>
+        <button>
+          Search <kbd>⌘K</kbd>
+        </button>
+      </Popover.Trigger>
+
+      <Popover.Content align="start" sideOffset={4}>
+        <Command>
+          <Command.Input placeholder="Search…" />
+          <Command.List>
+            <Command.Empty>No results found.</Command.Empty>
+            <Command.Group heading="Actions">
+              <Command.Item onSelect={() => setOpen(false)}>
+                Open settings
+              </Command.Item>
+              <Command.Item onSelect={() => setOpen(false)}>
+                Create new project
+              </Command.Item>
+            </Command.Group>
+          </Command.List>
+        </Command>
+      </Popover.Content>
+    </Popover.Root>
+  )
+}
+```
+
+<Tip>
+  Call `setOpen(false)` inside `onSelect` handlers to close the popover after the user picks an item.
+</Tip>
+
+## Styling the popover content
+
+Target `[cmdk-root]` inside your popover content selector, or scope your styles to the `Popover.Content` wrapper:
+
+```css
+/* Scoped to your popover */
+.my-popover [cmdk-root] {
+  width: 320px;
+  border: 1px solid var(--gray6);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+}
+
+.my-popover [cmdk-list] {
+  max-height: 300px;
+  overflow: auto;
+}
+```

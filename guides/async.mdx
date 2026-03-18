@@ -1,0 +1,147 @@
+---
+title: "Async results"
+description: "Fetch items asynchronously and render them as they arrive. cmdk filters and sorts them automatically as they load."
+---
+
+cmdk is designed to work naturally with async data. You render items as they become available and cmdk handles filtering, sorting, and selection automatically — no special integration required.
+
+## Basic async pattern
+
+Use `useState` for your items and a loading flag, then fetch in a `useEffect`. Render `Command.Loading` while the request is in flight:
+
+```tsx
+import { Command } from 'cmdk'
+
+function AsyncCommandMenu() {
+  const [loading, setLoading] = React.useState(false)
+  const [items, setItems] = React.useState<string[]>([])
+
+  React.useEffect(() => {
+    async function getItems() {
+      setLoading(true)
+      const res = await api.get('/dictionary')
+      setItems(res)
+      setLoading(false)
+    }
+
+    getItems()
+  }, [])
+
+  return (
+    <Command>
+      <Command.Input />
+      <Command.List>
+        {loading && <Command.Loading>Fetching words…</Command.Loading>}
+        {items.map((item) => (
+          <Command.Item key={`word-${item}`} value={item}>
+            {item}
+          </Command.Item>
+        ))}
+      </Command.List>
+    </Command>
+  )
+}
+```
+
+As items mount, they are registered with the store and filtered against the current search query. Items that arrive while the user is already typing are scored and sorted immediately.
+
+## Determinate progress
+
+Pass a `progress` prop (0–100) to `Command.Loading` to indicate how much has loaded. This sets the `aria-valuenow` attribute on the underlying `progressbar` role:
+
+```tsx
+const [progress, setProgress] = React.useState(0)
+
+return (
+  <Command.List>
+    {loading && (
+      <Command.Loading progress={progress}>
+        Loading… {progress}%
+      </Command.Loading>
+    )}
+  </Command.List>
+)
+```
+
+## Always-visible items with forceMount
+
+If some items should always be visible regardless of filtering — for example, recent searches shown while loading — use `forceMount` on those items:
+
+```tsx
+<Command.List>
+  {loading && <Command.Loading>Fetching results…</Command.Loading>}
+
+  <Command.Group heading="Recent">
+    {/* Always shown, even when filtering */}
+    <Command.Item forceMount value="recent-1">Recent search one</Command.Item>
+    <Command.Item forceMount value="recent-2">Recent search two</Command.Item>
+  </Command.Group>
+
+  {items.map((item) => (
+    <Command.Item key={item} value={item}>
+      {item}
+    </Command.Item>
+  ))}
+</Command.List>
+```
+
+## Debouncing search with useCommandState
+
+For search-as-you-type API calls, debounce the query to avoid issuing a request on every keystroke. Read the current search value with `useCommandState`:
+
+```tsx
+import { Command, useCommandState } from 'cmdk'
+
+function SearchResults() {
+  const search = useCommandState((state) => state.search)
+  const [items, setItems] = React.useState<string[]>([])
+  const [loading, setLoading] = React.useState(false)
+
+  React.useEffect(() => {
+    if (!search) {
+      setItems([])
+      return
+    }
+
+    const timeout = setTimeout(async () => {
+      setLoading(true)
+      const res = await api.get(`/search?q=${search}`)
+      setItems(res)
+      setLoading(false)
+    }, 300)
+
+    return () => clearTimeout(timeout)
+  }, [search])
+
+  return (
+    <>
+      {loading && <Command.Loading>Searching…</Command.Loading>}
+      {items.map((item) => (
+        <Command.Item key={item} value={item}>
+          {item}
+        </Command.Item>
+      ))}
+    </>
+  )
+}
+
+function AsyncCommandMenu() {
+  return (
+    <Command shouldFilter={false}>
+      <Command.Input />
+      <Command.List>
+        <Command.Empty>No results found.</Command.Empty>
+        <SearchResults />
+      </Command.List>
+    </Command>
+  )
+}
+```
+
+<Note>
+  `useCommandState` must be called inside a component that is a descendant of `Command`. It uses `useSyncExternalStore` internally and re-renders only when the selected slice of state changes.
+</Note>
+
+<Tip>
+  When fetching server-side results based on search input, set `shouldFilter={false}` on `Command`. The server returns only matching items, so there is nothing for cmdk to filter client-side.
+</Tip>

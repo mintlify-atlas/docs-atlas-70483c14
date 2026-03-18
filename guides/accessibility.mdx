@@ -1,0 +1,115 @@
+---
+title: "Accessibility"
+description: "cmdk implements the ARIA combobox pattern. Labeling, roles, and keyboard navigation are handled automatically."
+---
+
+cmdk implements the [ARIA combobox pattern](https://www.w3.org/WAI/ARIA/apg/patterns/combobox/). All required roles, properties, and relationships are set automatically. Labeling, keyboard navigation, and focus management are tested with VoiceOver and Chrome DevTools Accessibility panel.
+
+## Providing a label
+
+The only thing you must supply is a `label` prop on `Command`. This text is read by screen readers to identify the control — it is never shown visually.
+
+```tsx
+<Command label="Global command menu">
+  <Command.Input placeholder="Search…" />
+  <Command.List>
+    <Command.Empty>No results found.</Command.Empty>
+    <Command.Item>Open settings</Command.Item>
+    <Command.Item>Create new project</Command.Item>
+  </Command.List>
+</Command>
+```
+
+<Warning>
+  If you omit `label`, screen readers will announce the control without a meaningful name. Always provide a descriptive label.
+</Warning>
+
+## ARIA attributes set automatically
+
+cmdk sets all required ARIA attributes so you don't have to think about them.
+
+### Input
+
+The `Command.Input` renders as an `<input>` with:
+
+| Attribute | Value |
+|---|---|
+| `role` | `"combobox"` |
+| `aria-autocomplete` | `"list"` |
+| `aria-expanded` | `"true"` |
+| `aria-controls` | ID of the `Command.List` element |
+| `aria-activedescendant` | ID of the currently selected item |
+| `aria-labelledby` | ID of the visually hidden label element |
+
+### List
+
+`Command.List` renders as a `<div>` with:
+
+| Attribute | Value |
+|---|---|
+| `role` | `"listbox"` |
+| `aria-label` | `"Suggestions"` (default, overridable via `label` prop) |
+| `aria-activedescendant` | ID of the currently selected item |
+
+### Items
+
+Each `Command.Item` renders as a `<div>` with:
+
+| Attribute | Value |
+|---|---|
+| `role` | `"option"` |
+| `aria-selected` | `"true"` when selected, `"false"` otherwise |
+| `aria-disabled` | `"true"` when disabled |
+
+### Groups
+
+`Command.Group` uses a two-layer structure:
+
+- The outer container has `role="presentation"` 
+- The inner items container has `role="group"` and `aria-labelledby` pointing to the heading
+- The heading itself has `aria-hidden="true"` — it is referenced by `aria-labelledby`, not read redundantly
+
+## Command.Dialog
+
+`Command.Dialog` wraps Radix UI Dialog, which is fully accessible out of the box. It manages focus trapping, scroll locking, and the `aria-modal` attribute. Pass `label` to `Command.Dialog` — it is forwarded to the underlying `DialogContent` as `aria-label`:
+
+```tsx
+const [open, setOpen] = React.useState(false)
+
+return (
+  <Command.Dialog
+    open={open}
+    onOpenChange={setOpen}
+    label="Global command menu"
+  >
+    <Command.Input placeholder="Search…" />
+    <Command.List>
+      <Command.Empty>No results found.</Command.Empty>
+      <Command.Item>Dashboard</Command.Item>
+      <Command.Item>Settings</Command.Item>
+    </Command.List>
+  </Command.Dialog>
+)
+```
+
+<Note>
+  The Dialog overlay is always rendered when `Command.Dialog` is open. You can style it via `[cmdk-overlay]` and provide a custom class with `overlayClassName`.
+</Note>
+
+## Keyboard navigation
+
+cmdk handles all standard keyboard interactions:
+
+| Key | Action |
+|---|---|
+| `ArrowDown` | Move selection down |
+| `ArrowUp` | Move selection up |
+| `Enter` | Trigger `onSelect` on the selected item |
+| `Home` | Move to first item |
+| `End` | Move to last item |
+| `Ctrl+N` / `Ctrl+J` | Move down (vim bindings, enabled by default) |
+| `Ctrl+P` / `Ctrl+K` | Move up (vim bindings, enabled by default) |
+| `Alt+ArrowDown` | Jump to first item in next group |
+| `Alt+ArrowUp` | Jump to first item in previous group |
+
+Vim bindings can be disabled with `vimBindings={false}` on `Command`.

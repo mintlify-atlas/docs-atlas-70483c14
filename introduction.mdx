@@ -1,0 +1,68 @@
+---
+title: 'Introduction'
+description: 'A fast, unstyled command menu React component with automatic filtering and sorting.'
+---
+
+cmdk is a command menu React component that can also be used as an accessible combobox. You render items and it filters and sorts them automatically. cmdk supports a fully composable API, so you can wrap items in other components or render them as static JSX.
+
+<CardGroup cols={2}>
+  <Card title="Composable" icon="puzzle-piece">
+    Wrap items in your own components. Mix static JSX with dynamic lists. No render props or data arrays required.
+  </Card>
+  <Card title="Automatic filtering" icon="magnifying-glass">
+    Items are filtered and sorted in real time as the user types. Bring your own filter function or disable filtering entirely.
+  </Card>
+  <Card title="Accessible" icon="universal-access">
+    Labeling, ARIA attributes, and DOM ordering tested with VoiceOver and Chrome DevTools. Dialog mode composes an accessible Radix UI Dialog.
+  </Card>
+  <Card title="Unstyled" icon="paintbrush">
+    No default styles. Every element exposes a `cmdk-*` data attribute for you to target with plain CSS.
+  </Card>
+  <Card title="Dialog support" icon="window-maximize">
+    `Command.Dialog` renders the menu in a Radix UI Dialog overlay. Toggle it with any keybind you choose.
+  </Card>
+  <Card title="React 18 + 19" icon="react">
+    Built on React 18 hooks (`useId`, `useSyncExternalStore`). Fully compatible with React 19 and Strict Mode.
+  </Card>
+</CardGroup>
+
+## Basic usage
+
+```tsx
+import { Command } from 'cmdk'
+
+const CommandMenu = () => {
+  return (
+    <Command label="Command Menu">
+      <Command.Input />
+      <Command.List>
+        <Command.Empty>No results found.</Command.Empty>
+
+        <Command.Group heading="Letters">
+          <Command.Item>a</Command.Item>
+          <Command.Item>b</Command.Item>
+          <Command.Separator />
+          <Command.Item>c</Command.Item>
+        </Command.Group>
+
+        <Command.Item>Apple</Command.Item>
+      </Command.List>
+    </Command>
+  )
+}
+```
+
+<Note>
+  cmdk requires **React 18 or later**. It uses `useId` and `useSyncExternalStore`, which are only available in React 18+.
+</Note>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Installation" icon="download" href="/installation">
+    Install cmdk and its peer dependencies.
+  </Card>
+  <Card title="Quickstart" icon="bolt" href="/quickstart">
+    Build your first command menu in minutes.
+  </Card>
+</CardGroup>
